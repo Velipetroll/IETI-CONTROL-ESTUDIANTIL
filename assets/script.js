@@ -1,4 +1,4 @@
-// Configura tu Cloudinary aquí 👇
+// 🔧 Configuración de Cloudinary
 const CLOUD_NAME = "dweoz84zz"; // tu cloud_name
 const UPLOAD_PRESET = "estudiantes"; // tu upload preset
 
@@ -7,27 +7,30 @@ document.addEventListener("DOMContentLoaded", () => {
   const uploadForm = document.getElementById("uploadForm");
   const galeria = document.getElementById("galeria");
 
-  // --- Buscar imágenes por grado y año ---
+  // --- BUSCAR IMÁGENES POR GRADO Y AÑO ---
   if (buscarBtn) {
     buscarBtn.addEventListener("click", async () => {
       const grado = document.getElementById("grado").value;
       const anio = document.getElementById("anio").value;
-      const tipo = document.body.dataset.tipo; // "matriculas" o "observadores"
+      const tipo = document.body.dataset.tipo || "matriculas"; // tipo por defecto
 
       if (!grado || !anio) {
         galeria.innerHTML = "<p class='text-danger'>Selecciona grado y año.</p>";
         return;
       }
 
-      galeria.innerHTML = "<p>Cargando...</p>";
+      galeria.innerHTML = "<p>Cargando imágenes...</p>";
 
-      // Cloudinary no permite listar carpetas sin API privada,
-      // así que usamos los tags que asignamos al subir
+      // 🏷️ Creamos el tag con el mismo formato usado al subir
       const tag = `${tipo}_${anio}_${grado}`;
-      const url = `https://res.cloudinary.com/${CLOUD_NAME}/image/list/${tag}.json`;
 
       try {
-        const res = await fetch(url);
+        const res = await fetch(
+          `https://res.cloudinary.com/${CLOUD_NAME}/image/list/${tag}.json`
+        );
+
+        if (!res.ok) throw new Error("No se encontró el listado del tag");
+
         const data = await res.json();
         galeria.innerHTML = "";
 
@@ -36,40 +39,46 @@ document.addEventListener("DOMContentLoaded", () => {
           return;
         }
 
+        // 🖼️ Mostrar las imágenes
         data.resources.forEach((img) => {
           const col = document.createElement("div");
           col.className = "col-md-3 mb-3";
           col.innerHTML = `
-            <img src="${img.secure_url}" class="img-fluid rounded shadow-sm">
+            <div class="card shadow-sm">
+              <img src="${img.secure_url}" class="img-fluid rounded">
+            </div>
           `;
           galeria.appendChild(col);
         });
       } catch (error) {
-        galeria.innerHTML = "<p class='text-muted'>No se encontraron imágenes.</p>";
-        console.error(error);
+        galeria.innerHTML = "<p class='text-muted'>No se pudieron cargar imágenes.</p>";
+        console.error("Error al buscar imágenes:", error);
       }
     });
   }
 
-  // --- Subir imágenes ---
+  // --- SUBIR NUEVAS IMÁGENES ---
   if (uploadForm) {
     uploadForm.addEventListener("submit", async (e) => {
       e.preventDefault();
       const file = uploadForm.imagen.files[0];
       const grado = uploadForm.grado.value;
       const anio = uploadForm.anio.value;
-      const tipo = document.body.dataset.tipo; // "matriculas" o "observadores"
+      const tipo = document.body.dataset.tipo || "matriculas";
 
       if (!file || !grado || !anio) {
         alert("❗Selecciona archivo, grado y año");
         return;
       }
 
+      const folderPath = `${tipo}/${anio}/${grado}`;
+      const tag = `${tipo}_${anio}_${grado}`;
+
       const formData = new FormData();
       formData.append("file", file);
       formData.append("upload_preset", UPLOAD_PRESET);
-      formData.append("folder", `${tipo}/${anio}/${grado}`);
-      formData.append("tags", `${tipo}_${anio}_${grado}`);
+      formData.append("folder", folderPath);
+      formData.append("tags", tag);
 
       try {
         const res = await fetch(
@@ -79,12 +88,19 @@ document.addEventListener("DOMContentLoaded", () => {
             body: formData,
           }
         );
+
         const data = await res.json();
-        alert("✅ Imagen subida correctamente");
-        console.log("Resultado Cloudinary:", data);
+
+        if (data.secure_url) {
+          alert("✅ Imagen subida correctamente");
+          console.log("✅ Resultado de Cloudinary:", data);
+        } else {
+          alert("⚠️ No se pudo subir la imagen");
+          console.error("Respuesta de Cloudinary:", data);
+        }
       } catch (error) {
         alert("❌ Error al subir la imagen");
-        console.error(error);
+        console.error("Error al subir:", error);
       }
     });
   }
