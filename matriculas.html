@@ -7,9 +7,9 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 
+<!-- 👇 data-tipo indica al script que esta página es de "matriculas" -->
 <body class="bg-light" data-tipo="matriculas">
 
-  <!-- Barra de navegación -->
   <nav class="navbar navbar-light bg-white shadow-sm">
     <div class="container">
       <a href="index.html" class="navbar-brand fw-bold text-primary">← Inicio</a>
@@ -17,40 +17,23 @@
     </div>
   </nav>
 
-  <!-- Contenido principal -->
   <div class="container py-4">
     <h2 class="mb-4 text-center">Buscador de Matrículas</h2>
 
-    <!-- Buscador -->
+    <!-- 🔍 Buscador -->
     <div class="card shadow-sm p-4 mb-4">
       <div class="row g-3 justify-content-center">
         <div class="col-md-4">
           <select id="grado" class="form-select">
             <option value="">Seleccionar grado</option>
-            <option>6A</option>
-            <option>6B</option>
-            <option>6C</option>
-            <option>6D</option>
-            <option>6E</option>
-            <option>6F</option>
-            <option>7A</option>
-            <option>7B</option>
-            <option>7C</option>
-            <option>7D</option>
-            <option>8A</option>
-            <option>8B</option>
-            <option>8C</option>
-            <option>8D</option>
-            <option>9A</option>
-            <option>9B</option>
-            <option>9C</option>
-            <option>10A</option>
-            <option>10B</option>
-            <option>11A</option>
-            <option>11B</option>
+            <option>6A</option><option>6B</option><option>6C</option><option>6D</option><option>6E</option><option>6F</option>
+            <option>7A</option><option>7B</option><option>7C</option><option>7D</option><option>7E</option><option>7F</option>
+            <option>8A</option><option>8B</option><option>8C</option><option>8D</option><option>8E</option><option>8F</option>
+            <option>9A</option><option>9B</option><option>9C</option><option>9D</option><option>9E</option><option>9F</option>
+            <option>10A</option><option>10B</option><option>10C</option>
+            <option>11A</option><option>11B</option><option>11C</option>
           </select>
         </div>
-
         <div class="col-md-3">
           <select id="anio" class="form-select">
             <option value="">Seleccionar año</option>
@@ -60,21 +43,20 @@
             <option>2025</option>
           </select>
         </div>
-
         <div class="col-md-2 d-grid">
           <button id="buscar" class="btn btn-primary">Buscar</button>
         </div>
       </div>
     </div>
 
-    <!-- Galería de imágenes -->
+    <!-- 🖼️ Galería -->
     <div id="galeria" class="row g-3 justify-content-center text-center text-secondary">
       <p>Selecciona un grado y año para ver las matrículas.</p>
     </div>
 
     <hr class="my-5">
 
-    <!-- Subida de imágenes -->
+    <!-- 📤 Subida de imágenes -->
     <div class="card shadow-sm p-4">
       <h4 class="mb-3 text-center">Subir nueva matrícula</h4>
       <form id="uploadForm">
@@ -85,27 +67,12 @@
           <div class="col-md-3">
             <select name="grado" class="form-select" required>
               <option value="">Grado</option>
-              <option>6A</option>
-              <option>6B</option>
-              <option>6C</option>
-              <option>6D</option>
-              <option>6E</option>
-              <option>6F</option>
-              <option>7A</option>
-              <option>7B</option>
-              <option>7C</option>
-              <option>7D</option>
-              <option>8A</option>
-              <option>8B</option>
-              <option>8C</option>
-              <option>8D</option>
-              <option>9A</option>
-              <option>9B</option>
-              <option>9C</option>
-              <option>10A</option>
-              <option>10B</option>
-              <option>11A</option>
-              <option>11B</option>
+              <option>6A</option><option>6B</option><option>6C</option><option>6D</option><option>6E</option><option>6F</option>
+              <option>7A</option><option>7B</option><option>7C</option><option>7D</option><option>7E</option><option>7F</option>
+              <option>8A</option><option>8B</option><option>8C</option><option>8D</option><option>8E</option><option>8F</option>
+              <option>9A</option><option>9B</option><option>9C</option><option>9D</option><option>9E</option><option>9F</option>
+              <option>10A</option><option>10B</option><option>10C</option>
+              <option>11A</option><option>11B</option><option>11C</option>
             </select>
           </div>
           <div class="col-md-3">
@@ -125,7 +92,6 @@
     </div>
   </div>
 
-  <!-- Script principal -->
   <script src="assets/script.js"></script>
 </body>
 </html>
