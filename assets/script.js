@@ -1,53 +1,107 @@
-const CLOUD_NAME = "dweoz84zz";
+// 🔧 Configuración de Cloudinary
+const CLOUD_NAME = "dweoz84zz"; // tu cloud_name
+const UPLOAD_PRESET = "estudiantes"; // tu upload preset
 
-document.addEventListener("DOMContentLoaded", async () => {
+document.addEventListener("DOMContentLoaded", () => {
+  const buscarBtn = document.getElementById("buscar");
+  const uploadForm = document.getElementById("uploadForm");
   const galeria = document.getElementById("galeria");
-  galeria.innerHTML = "<p>🔍 Buscando imágenes 'descarga.jpg' en todas las carpetas...</p>";
 
-  const tipo = "matriculas"; // puedes cambiar a "observadores" si quieres probar esa parte
-  const anios = ["2022", "2023", "2024", "2025"];
-  const grados = ["6A","6B","6C","6D","6E","6F","7A","7B","7C","7D","7E","8A","8B","8C","8D","9A","9B","9C","10A","10B","11A","11B"];
+  // --- BUSCAR IMÁGENES POR GRADO Y AÑO ---
+  if (buscarBtn) {
+    buscarBtn.addEventListener("click", async () => {
+      const grado = document.getElementById("grado").value;
+      const anio = document.getElementById("anio").value;
+      const tipo = document.body.dataset.tipo || "matriculas"; // tipo por defecto
 
-  galeria.innerHTML = "";
+      if (!grado || !anio) {
+        galeria.innerHTML = "<p class='text-danger'>Selecciona grado y año.</p>";
+        return;
+      }
 
-  let encontrados = 0;
+      galeria.innerHTML = "<p>Cargando imágenes...</p>";
 
-  for (const anio of anios) {
-    for (const grado of grados) {
-      const url = `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/${tipo}/${anio}/${grado}/descarga.jpg`;
+      // 🏷️ Creamos el tag con el mismo formato usado al subir
+      const tag = `${tipo}_${anio}_${grado}`;
 
-      // Verificamos si existe
       try {
-        const res = await fetch(url);
-        if (res.ok) {
-          encontrados++;
+        const res = await fetch(
+          `https://res.cloudinary.com/${CLOUD_NAME}/image/list/${tag}.json`
+        );
+
+        if (!res.ok) throw new Error("No se encontró el listado del tag");
+
+        const data = await res.json();
+        galeria.innerHTML = "";
+
+        if (!data.resources || data.resources.length === 0) {
+          galeria.innerHTML = "<p class='text-muted'>No se encontraron imágenes.</p>";
+          return;
+        }
+
+        // 🖼️ Mostrar las imágenes
+        data.resources.forEach((img) => {
           const col = document.createElement("div");
           col.className = "col-md-3 mb-3";
           col.innerHTML = `
             <div class="card shadow-sm">
-              <img src="${url}" class="img-fluid rounded">
-              <p class="mt-2 small text-secondary">${tipo}/${anio}/${grado}/descarga.jpg</p>
+              <img src="${img.secure_url}" class="img-fluid rounded">
             </div>
           `;
           galeria.appendChild(col);
-        }
-      } catch (err) {
-        console.log(`No se encontró en ${anio}/${grado}`);
+        });
+      } catch (error) {
+        galeria.innerHTML = "<p class='text-muted'>No se pudieron cargar imágenes.</p>";
+        console.error("Error al buscar imágenes:", error);
       }
-    }
+    });
   }
 
-  if (encontrados === 0) {
-    galeria.innerHTML = `
-      <p class="text-danger text-center">
-        ❌ No se encontró ninguna imagen llamada <strong>descarga.jpg</strong> 
-        en las carpetas especificadas.
-      </p>
-    `;
-  } else {
-    galeria.insertAdjacentHTML(
-      "afterbegin",
-      `<p class="text-success text-center">✅ Se encontraron ${encontrados} imágenes con nombre descarga.jpg</p>`
-    );
+  // --- SUBIR NUEVAS IMÁGENES ---
+  if (uploadForm) {
+    uploadForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const file = uploadForm.imagen.files[0];
+      const grado = uploadForm.grado.value;
+      const anio = uploadForm.anio.value;
+      const tipo = document.body.dataset.tipo || "matriculas";
+
+      if (!file || !grado || !anio) {
+        alert("❗Selecciona archivo, grado y año");
+        return;
+      }
+
+      const folderPath = `${tipo}/${anio}/${grado}`;
+      const tag = `${tipo}_${anio}_${grado}`;
+
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("upload_preset", UPLOAD_PRESET);
+      formData.append("folder", folderPath);
+      formData.append("tags", tag);
+
+      try {
+        const res = await fetch(
+          `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
+          {
+            method: "POST",
+            body: formData,
+          }
+        );
+
+        const data = await res.json();
+
+        if (data.secure_url) {
+          alert("✅ Imagen subida correctamente");
+          console.log("✅ Resultado de Cloudinary:", data);
+        } else {
+          alert("⚠️ No se pudo subir la imagen");
+          console.error("Respuesta de Cloudinary:", data);
+        }
+      } catch (error) {
+        alert("❌ Error al subir la imagen");
+        console.error("Error al subir:", error);
+      }
+    });
   }
 });
