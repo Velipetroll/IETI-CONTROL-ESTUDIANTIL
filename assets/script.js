@@ -1,90 +1,81 @@
-// Configura tu Cloudinary aquí 👇
-const CLOUD_NAME = "dweoz84zz"; // tu cloud_name
-const UPLOAD_PRESET = "estudiantes"; // tu upload preset
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Matrículas</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
 
-document.addEventListener("DOMContentLoaded", () => {
-  const buscarBtn = document.getElementById("buscar");
-  const uploadForm = document.getElementById("uploadForm");
-  const galeria = document.getElementById("galeria");
+<!-- 👇 Aquí agregamos el data-tipo -->
+<body class="bg-light" data-tipo="matriculas">
 
-  // --- Buscar imágenes por grado y año ---
-  if (buscarBtn) {
-    buscarBtn.addEventListener("click", async () => {
-      const grado = document.getElementById("grado").value;
-      const anio = document.getElementById("anio").value;
-      const tipo = document.body.dataset.tipo; // "matriculas" o "observadores"
+  <nav class="navbar navbar-light bg-white shadow-sm">
+    <div class="container">
+      <a href="index.html" class="navbar-brand fw-bold text-primary">← Inicio</a>
+      <span class="navbar-text text-secondary">Matrículas</span>
+    </div>
+  </nav>
 
-      if (!grado || !anio) {
-        galeria.innerHTML = "<p class='text-danger'>Selecciona grado y año.</p>";
-        return;
-      }
+  <div class="container py-4">
+    <h2 class="mb-4 text-center">Buscador de Matrículas</h2>
 
-      galeria.innerHTML = "<p>Cargando...</p>";
+    <!-- Buscador -->
+    <div class="card shadow-sm p-4 mb-4">
+      <div class="row g-3 justify-content-center">
+        <div class="col-md-4">
+          <select id="grado" class="form-select">
+            <option value="">Seleccionar grado</option>
+            <option>6A</option><option>6B</option><option>7A</option><option>7B</option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <select id="anio" class="form-select">
+            <option value="">Seleccionar año</option>
+            <option>2023</option><option>2024</option><option>2025</option>
+          </select>
+        </div>
+        <div class="col-md-2 d-grid">
+          <button id="buscar" class="btn btn-primary">Buscar</button>
+        </div>
+      </div>
+    </div>
 
-      // Buscar por tag asignado al subir
-      const tag = `${tipo}_${anio}_${grado}`;
-      const url = `https://res.cloudinary.com/${CLOUD_NAME}/image/list/${tag}.json`;
+    <!-- Galería -->
+    <div id="galeria" class="row g-3 justify-content-center text-center text-secondary">
+      <p>Selecciona un grado y año para ver las matrículas.</p>
+    </div>
 
-      try {
-        const res = await fetch(url);
-        const data = await res.json();
-        galeria.innerHTML = "";
+    <hr class="my-5">
 
-        if (!data.resources || data.resources.length === 0) {
-          galeria.innerHTML = "<p class='text-muted'>No se encontraron imágenes.</p>";
-          return;
-        }
+    <!-- Subida de imágenes -->
+    <div class="card shadow-sm p-4">
+      <h4 class="mb-3 text-center">Subir nueva matrícula</h4>
+      <form id="uploadForm">
+        <div class="row g-3 justify-content-center">
+          <div class="col-md-4">
+            <input type="file" name="imagen" accept="image/*" class="form-control" required>
+          </div>
+          <div class="col-md-3">
+            <select name="grado" class="form-select" required>
+              <option value="">Grado</option>
+              <option>6A</option><option>6B</option><option>7A</option><option>7B</option>
+            </select>
+          </div>
+          <div class="col-md-3">
+            <select name="anio" class="form-select" required>
+              <option value="">Año</option>
+              <option>2023</option><option>2024</option><option>2025</option>
+            </select>
+          </div>
+          <div class="col-md-2 d-grid">
+            <button type="submit" class="btn btn-success">Subir</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
 
-        data.resources.forEach((img) => {
-          const col = document.createElement("div");
-          col.className = "col-md-3 mb-3";
-          col.innerHTML = `
-            <img src="${img.secure_url}" class="img-fluid rounded shadow-sm">
-          `;
-          galeria.appendChild(col);
-        });
-      } catch (error) {
-        galeria.innerHTML = "<p class='text-muted'>No se encontraron imágenes.</p>";
-        console.error(error);
-      }
-    });
-  }
-
-  // --- Subir imágenes ---
-  if (uploadForm) {
-    uploadForm.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const file = uploadForm.imagen.files[0];
-      const grado = uploadForm.grado.value;
-      const anio = uploadForm.anio.value;
-      const tipo = document.body.dataset.tipo; // "matriculas" o "observadores"
-
-      if (!file || !grado || !anio) {
-        alert("❗Selecciona archivo, grado y año");
-        return;
-      }
-
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("upload_preset", UPLOAD_PRESET);
-      formData.append("folder", `${tipo}/${anio}/${grado}`);
-      formData.append("tags", `${tipo}_${anio}_${grado}`);
-
-      try {
-        const res = await fetch(
-          `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
-          {
-            method: "POST",
-            body: formData,
-          }
-        );
-        const data = await res.json();
-        alert("✅ Imagen subida correctamente");
-        console.log("Resultado Cloudinary:", data);
-      } catch (error) {
-        alert("❌ Error al subir la imagen");
-        console.error(error);
-      }
-    });
-  }
-});
+  <script src="assets/script.js"></script>
+</body>
+</html>
