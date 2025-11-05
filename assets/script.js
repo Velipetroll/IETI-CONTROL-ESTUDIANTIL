@@ -1,81 +1,40 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Matrículas</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
+// Configura tus datos de Cloudinary
+const CLOUD_NAME = "dweoz84zz";
+const UPLOAD_PRESET = "estudiantes";
 
-<!-- 👇 Aquí agregamos el data-tipo -->
-<body class="bg-light" data-tipo="matriculas">
+const uploadInput = document.getElementById("uploadInput");
+const uploadBtn = document.getElementById("uploadBtn");
+const gradoSelect = document.getElementById("grado");
+const anioSelect = document.getElementById("anio");
+const tipo = document.body.dataset.tipo; // "matriculas" o "observadores"
 
-  <nav class="navbar navbar-light bg-white shadow-sm">
-    <div class="container">
-      <a href="index.html" class="navbar-brand fw-bold text-primary">← Inicio</a>
-      <span class="navbar-text text-secondary">Matrículas</span>
-    </div>
-  </nav>
+uploadBtn.addEventListener("click", async () => {
+  const file = uploadInput.files[0];
+  const grado = gradoSelect.value;
+  const anio = anioSelect.value;
 
-  <div class="container py-4">
-    <h2 class="mb-4 text-center">Buscador de Matrículas</h2>
+  if (!file || !grado || !anio) {
+    alert("Selecciona archivo, grado y año");
+    return;
+  }
 
-    <!-- Buscador -->
-    <div class="card shadow-sm p-4 mb-4">
-      <div class="row g-3 justify-content-center">
-        <div class="col-md-4">
-          <select id="grado" class="form-select">
-            <option value="">Seleccionar grado</option>
-            <option>6A</option><option>6B</option><option>7A</option><option>7B</option>
-          </select>
-        </div>
-        <div class="col-md-3">
-          <select id="anio" class="form-select">
-            <option value="">Seleccionar año</option>
-            <option>2023</option><option>2024</option><option>2025</option>
-          </select>
-        </div>
-        <div class="col-md-2 d-grid">
-          <button id="buscar" class="btn btn-primary">Buscar</button>
-        </div>
-      </div>
-    </div>
+  const folderPath = `${tipo}/${anio}/${grado}`;
 
-    <!-- Galería -->
-    <div id="galeria" class="row g-3 justify-content-center text-center text-secondary">
-      <p>Selecciona un grado y año para ver las matrículas.</p>
-    </div>
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("upload_preset", UPLOAD_PRESET);
+  formData.append("folder", folderPath);
 
-    <hr class="my-5">
-
-    <!-- Subida de imágenes -->
-    <div class="card shadow-sm p-4">
-      <h4 class="mb-3 text-center">Subir nueva matrícula</h4>
-      <form id="uploadForm">
-        <div class="row g-3 justify-content-center">
-          <div class="col-md-4">
-            <input type="file" name="imagen" accept="image/*" class="form-control" required>
-          </div>
-          <div class="col-md-3">
-            <select name="grado" class="form-select" required>
-              <option value="">Grado</option>
-              <option>6A</option><option>6B</option><option>7A</option><option>7B</option>
-            </select>
-          </div>
-          <div class="col-md-3">
-            <select name="anio" class="form-select" required>
-              <option value="">Año</option>
-              <option>2023</option><option>2024</option><option>2025</option>
-            </select>
-          </div>
-          <div class="col-md-2 d-grid">
-            <button type="submit" class="btn btn-success">Subir</button>
-          </div>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <script src="assets/script.js"></script>
-</body>
-</html>
+  try {
+    const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/upload`, {
+      method: "POST",
+      body: formData,
+    });
+    const data = await res.json();
+    alert("✅ Archivo subido correctamente a " + folderPath);
+    console.log("URL:", data.secure_url);
+  } catch (err) {
+    console.error(err);
+    alert("❌ Error al subir la imagen");
+  }
+});
