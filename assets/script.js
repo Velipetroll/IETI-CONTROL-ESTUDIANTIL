@@ -1,6 +1,6 @@
 // Configura tu Cloudinary aquí 👇
-const CLOUD_NAME = "TU_CLOUD_NAME";
-const UPLOAD_PRESET = "TU_UPLOAD_PRESET";
+const CLOUD_NAME = "dweoz84zz";
+const UPLOAD_PRESET = "estudiantes";
 
 document.addEventListener('DOMContentLoaded', () => {
   const buscarBtn = document.getElementById('buscar');
@@ -64,3 +64,4 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 });
+
