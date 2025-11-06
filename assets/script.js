@@ -52,48 +52,45 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // --- Subir imágenes ---
-  if (uploadForm) {
-    uploadForm.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const file = uploadForm.imagen.files[0];
-      const grado = uploadForm.grado.value;
-      const anio = uploadForm.anio.value;
-      const tipo = document.body.dataset.tipo || "matriculas"; // "matriculas" o "observadores"
+ // --- Subir imágenes ---
+if (uploadForm) {
+  uploadForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const file = uploadForm.imagen.files[0];
+    const grado = uploadForm.grado.value;
+    const anio = uploadForm.anio.value;
+    const tipo = document.body.dataset.tipo || "matriculas";
 
-      if (!file || !grado || !anio) {
-        alert("❗Selecciona archivo, grado y año");
-        return;
+    if (!file || !grado || !anio) {
+      alert("❗Selecciona archivo, grado y año");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", UPLOAD_PRESET);
+    formData.append("folder", `${tipo}/${anio}/${grado}`);
+    formData.append("tags", `${tipo}_${anio}_${grado}`);
+
+    console.log("Subiendo con tags:", `${tipo}_${anio}_${grado}`);
+
+    try {
+      const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await res.json();
+      console.log("Respuesta de Cloudinary:", data);
+
+      if (data.secure_url) {
+        alert("✅ Imagen subida correctamente");
+      } else {
+        alert("⚠️ Hubo un problema al subir la imagen.");
       }
-
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("upload_preset", UPLOAD_PRESET);
-      formData.append("folder", `${tipo}/${anio}/${grado}`);
-      formData.append("tags", `${tipo}_${anio}_${grado}`); // 👈 clave: tag para generar JSON público
-
-      try {
-        const res = await fetch(
-          `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
-          {
-            method: "POST",
-            body: formData,
-          }
-        );
-
-        const data = await res.json();
-
-        if (data.secure_url) {
-          alert("✅ Imagen subida correctamente");
-          console.log("📸 Subida exitosa:", data.secure_url);
-        } else {
-          alert("⚠️ Hubo un problema al subir la imagen.");
-          console.error("Respuesta de Cloudinary:", data);
-        }
-      } catch (error) {
-        alert("❌ Error al subir la imagen");
-        console.error(error);
-      }
-    });
-  }
-});
+    } catch (error) {
+      alert("❌ Error al subir la imagen");
+      console.error(error);
+    }
+  });
+}
