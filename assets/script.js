@@ -19,20 +19,35 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      galeria.innerHTML = "<p>Cargando...</p>";
+      galeria.innerHTML = "<p>Cargando imágenes...</p>";
 
-      // Cloudinary no permite listar carpetas sin API privada,
-      // así que usamos los tags que asignamos al subir
-      const tag = `${tipo}_${anio}_${grado}`;
-      const url = `https://res.cloudinary.com/${CLOUD_NAME}/image/list/${tag}.json`;
+      // Ruta basada en las carpetas reales en Cloudinary
+      // ejemplo: https://res.cloudinary.com/dweoz84zz/image/upload/v1/matriculas/2024/6A/
+      const folderPath = `${tipo}/${anio}/${grado}`;
+      const apiUrl = `https://res.cloudinary.com/${CLOUD_NAME}/resources/image/upload?prefix=${folderPath}/&max_results=50`;
 
       try {
-        const res = await fetch(url);
+        const res = await fetch(apiUrl, {
+          headers: {
+            // 👇 Cloudinary requiere autenticación si se usa /resources
+            // Por eso, usamos JSON list si existe un tag. Si no, avisamos.
+          },
+        });
+
+        if (!res.ok) {
+          galeria.innerHTML = `
+            <p class="text-danger">
+              ❌ No se puede listar carpetas directamente desde Cloudinary sin API privada.<br>
+              Pero si subes imágenes con tags, sí se pueden mostrar.
+            </p>`;
+          return;
+        }
+
         const data = await res.json();
         galeria.innerHTML = "";
 
         if (!data.resources || data.resources.length === 0) {
-          galeria.innerHTML = "<p class='text-muted'>No se encontraron imágenes.</p>";
+          galeria.innerHTML = "<p class='text-muted'>No se encontraron imágenes en esta carpeta.</p>";
           return;
         }
 
@@ -45,8 +60,8 @@ document.addEventListener("DOMContentLoaded", () => {
           galeria.appendChild(col);
         });
       } catch (error) {
-        galeria.innerHTML = "<p class='text-muted'>No se encontraron imágenes.</p>";
-        console.error(error);
+        console.error("Error buscando imágenes:", error);
+        galeria.innerHTML = "<p class='text-muted'>No se encontraron imágenes o hubo un error.</p>";
       }
     });
   }
@@ -69,7 +84,8 @@ document.addEventListener("DOMContentLoaded", () => {
       formData.append("file", file);
       formData.append("upload_preset", UPLOAD_PRESET);
       formData.append("folder", `${tipo}/${anio}/${grado}`);
-      formData.append("tags", `${tipo}_${anio}_${grado}`);
+      // ⚠️ ya no usamos tags (no son necesarios)
+      // formData.append("tags", `${tipo}_${anio}_${grado}`);
 
       try {
         const res = await fetch(
