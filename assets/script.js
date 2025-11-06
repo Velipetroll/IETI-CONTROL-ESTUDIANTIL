@@ -1,4 +1,4 @@
-// --- Configuración de Cloudinary ---
+// --- Configuración Cloudinary ---
 const CLOUD_NAME = "dweoz84zz"; // tu cloud_name
 const UPLOAD_PRESET = "estudiantes"; // tu upload preset
 
@@ -7,7 +7,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const uploadForm = document.getElementById("uploadForm");
   const galeria = document.getElementById("galeria");
 
-  // --- Subir imágenes con TAGS ---
+  // --- Subir imágenes ---
   if (uploadForm) {
     uploadForm.addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -15,7 +15,8 @@ document.addEventListener("DOMContentLoaded", () => {
       const file = uploadForm.imagen.files[0];
       const grado = uploadForm.grado.value;
       const anio = uploadForm.anio.value;
-      // Si no existe dataset.tipo, usamos el nombre del HTML
+
+      // Detectar si la página es de observadores o matrículas
       const tipo = document.title.toLowerCase().includes("observadores")
         ? "observadores"
         : "matriculas";
@@ -26,28 +27,34 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       const tag = `${tipo}_${anio}_${grado}`; // Ejemplo: observadores_2025_6A
+      const folderPath = `${tipo}/${anio}/${grado}`;
 
       const formData = new FormData();
       formData.append("file", file);
       formData.append("upload_preset", UPLOAD_PRESET);
-      formData.append("folder", `${tipo}/${anio}/${grado}`);
+      formData.append("folder", folderPath);
       formData.append("tags", tag);
 
+      galeria.innerHTML = "<p>Subiendo imagen...</p>";
+
       try {
-        const res = await fetch(
-          `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
-          {
-            method: "POST",
-            body: formData,
-          }
-        );
+        const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
+          method: "POST",
+          body: formData,
+        });
 
         const data = await res.json();
-        console.log("✅ Imagen subida:", data);
-        alert("✅ Imagen subida correctamente con tag: " + tag);
+
+        if (data.secure_url) {
+          galeria.innerHTML = `<p class='text-success'>✅ Imagen subida correctamente.</p>`;
+          console.log("📤 Subida exitosa:", data);
+        } else {
+          galeria.innerHTML = `<p class='text-danger'>❌ Error al subir: ${data.error?.message || "Verifica el preset o formato"}</p>`;
+          console.error("Error Cloudinary:", data);
+        }
       } catch (error) {
-        console.error("❌ Error al subir:", error);
-        alert("❌ Error al subir la imagen");
+        galeria.innerHTML = `<p class='text-danger'>❌ Error al subir la imagen.</p>`;
+        console.error("Error de conexión:", error);
       }
     });
   }
@@ -67,12 +74,33 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       const tag = `${tipo}_${anio}_${grado}`;
-      galeria.innerHTML = `<p>Cargando imágenes del grupo <b>${tag}</b>...</p>`;
-
       const url = `https://res.cloudinary.com/${CLOUD_NAME}/image/list/${tag}.json`;
+
+      galeria.innerHTML = `<p>Cargando imágenes del grupo <b>${tag}</b>...</p>`;
 
       try {
         const res = await fetch(url);
         const data = await res.json();
 
-        galeri
+        galeria.innerHTML = "";
+
+        if (!data.resources || data.resources.length === 0) {
+          galeria.innerHTML = `<p class="text-muted">No hay imágenes con el tag <b>${tag}</b>.</p>`;
+          return;
+        }
+
+        data.resources.forEach((img) => {
+          const col = document.createElement("div");
+          col.className = "col-md-3 mb-3";
+          col.innerHTML = `
+            <img src="${img.secure_url}" class="img-fluid rounded shadow-sm">
+          `;
+          galeria.appendChild(col);
+        });
+      } catch (error) {
+        console.error("Error cargando imágenes:", error);
+        galeria.innerHTML = "<p class='text-danger'>Error al buscar imágenes.</p>";
+      }
+    });
+  }
+});
