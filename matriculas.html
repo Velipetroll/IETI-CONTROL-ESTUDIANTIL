@@ -2,46 +2,130 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Matrículas</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
-<body class="bg-light">
-  <div class="container py-4">
-    <h1 class="mb-4 text-center">Matrículas</h1>
 
-    <div class="card p-4 shadow-sm">
-      <div class="row g-3 align-items-end">
+<body class="bg-light" data-tipo="matriculas">
+
+  <!-- Barra de navegación -->
+  <nav class="navbar navbar-light bg-white shadow-sm">
+    <div class="container">
+      <a href="index.html" class="navbar-brand fw-bold text-primary">← Inicio</a>
+      <span class="navbar-text text-secondary">Matrículas</span>
+    </div>
+  </nav>
+
+  <!-- Contenido principal -->
+  <div class="container py-4">
+    <h2 class="mb-4 text-center">Buscador de Matrículas</h2>
+
+    <!-- Buscador -->
+    <div class="card shadow-sm p-4 mb-4">
+      <div class="row g-3 justify-content-center">
         <div class="col-md-4">
-          <label for="grado" class="form-label">Grado</label>
           <select id="grado" class="form-select">
-            <option value="">Seleccionar</option>
+            <option value="">Seleccionar grado</option>
             <option>6A</option>
+            <option>6B</option>
+            <option>6C</option>
+            <option>6D</option>
+            <option>6E</option>
+            <option>6F</option>
             <option>7A</option>
+            <option>7B</option>
+            <option>7C</option>
+            <option>7D</option>
             <option>8A</option>
+            <option>8B</option>
+            <option>8C</option>
+            <option>8D</option>
             <option>9A</option>
+            <option>9B</option>
+            <option>9C</option>
+            <option>10A</option>
+            <option>10B</option>
+            <option>11A</option>
+            <option>11B</option>
           </select>
         </div>
 
-        <div class="col-md-4">
-          <label for="anio" class="form-label">Año</label>
+        <div class="col-md-3">
           <select id="anio" class="form-select">
-            <option value="">Seleccionar</option>
+            <option value="">Seleccionar año</option>
+            <option>2022</option>
             <option>2023</option>
             <option>2024</option>
+            <option>2025</option>
           </select>
         </div>
 
-        <div class="col-md-4">
-          <button id="buscarBtn" class="btn btn-primary w-100">Buscar</button>
+        <div class="col-md-2 d-grid">
+          <button id="buscar" class="btn btn-primary">Buscar</button>
         </div>
       </div>
     </div>
 
-    <div id="galeria" class="row mt-4 g-3">
-      <!-- Aquí se mostrarán las imágenes -->
+    <!-- Galería de imágenes -->
+    <div id="galeria" class="row g-3 justify-content-center text-center text-secondary">
+      <p>Selecciona un grado y año para ver las matrículas.</p>
+    </div>
+
+    <hr class="my-5">
+
+    <!-- Subida de imágenes -->
+    <div class="card shadow-sm p-4">
+      <h4 class="mb-3 text-center">Subir nueva matrícula</h4>
+      <form id="uploadForm">
+        <div class="row g-3 justify-content-center">
+          <div class="col-md-4">
+            <input type="file" name="imagen" accept="image/*" class="form-control" required>
+          </div>
+          <div class="col-md-3">
+            <select name="grado" class="form-select" required>
+              <option value="">Grado</option>
+              <option>6A</option>
+              <option>6B</option>
+              <option>6C</option>
+              <option>6D</option>
+              <option>6E</option>
+              <option>6F</option>
+              <option>7A</option>
+              <option>7B</option>
+              <option>7C</option>
+              <option>7D</option>
+              <option>8A</option>
+              <option>8B</option>
+              <option>8C</option>
+              <option>8D</option>
+              <option>9A</option>
+              <option>9B</option>
+              <option>9C</option>
+              <option>10A</option>
+              <option>10B</option>
+              <option>11A</option>
+              <option>11B</option>
+            </select>
+          </div>
+          <div class="col-md-3">
+            <select name="anio" class="form-select" required>
+              <option value="">Año</option>
+              <option>2022</option>
+              <option>2023</option>
+              <option>2024</option>
+              <option>2025</option>
+            </select>
+          </div>
+          <div class="col-md-2 d-grid">
+            <button type="submit" class="btn btn-success">Subir</button>
+          </div>
+        </div>
+      </form>
     </div>
   </div>
 
+  <!-- Script principal -->
   <script src="assets/script.js"></script>
 </body>
 </html>
