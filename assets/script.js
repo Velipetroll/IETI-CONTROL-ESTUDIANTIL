@@ -1,4 +1,4 @@
-const API_BASE = "https://backend-cloudinary.vercel.app"; // ⚠️ sin la barra al final
+const API_BASE = "https://backend-cloudinary.vercel.app/"; // ⚠️ sin la barra al final
 
 document.addEventListener("DOMContentLoaded", () => {
   const buscarBtn = document.getElementById("buscar");
@@ -86,5 +86,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 });
+
 
 
