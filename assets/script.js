@@ -5,18 +5,19 @@ document.addEventListener("DOMContentLoaded", () => {
   const uploadForm = document.getElementById("uploadForm");
   const galeria = document.getElementById("galeria");
 
+  // --- Buscar archivos ---
   if (buscarBtn) {
     buscarBtn.addEventListener("click", async () => {
       const grado = document.getElementById("grado").value;
       const anio = document.getElementById("anio").value;
-      const tipo = document.body.dataset.tipo;
+      const tipo = document.body.dataset.tipo; // "matriculas" o "observadores"
 
       if (!grado || !anio) {
         galeria.innerHTML = "<p class='text-danger'>Selecciona grado y año.</p>";
         return;
       }
 
-      galeria.innerHTML = "<p>Cargando imágenes...</p>";
+      galeria.innerHTML = "<p>Cargando archivos...</p>";
 
       try {
         const res = await fetch(`${API_BASE}/imagenes?tipo=${tipo}&anio=${anio}&grado=${grado}`);
@@ -25,22 +26,32 @@ document.addEventListener("DOMContentLoaded", () => {
         galeria.innerHTML = "";
 
         if (!data.length) {
-          galeria.innerHTML = "<p class='text-muted'>No se encontraron imágenes.</p>";
+          galeria.innerHTML = "<p class='text-muted'>No se encontraron archivos.</p>";
           return;
         }
 
-        data.forEach((img) => {
+        data.forEach((file) => {
           const col = document.createElement("div");
-          col.className = "col-md-3 mb-3";
-          col.innerHTML = `<img src="${img.url}" class="img-fluid rounded shadow-sm">`;
+          col.className = "col-md-3 mb-3 text-center";
+
+          col.innerHTML = `
+            <img src="${file.url}" class="img-fluid rounded shadow-sm mb-2">
+            <button class="btn btn-primary btn-sm w-100"
+              onclick="window.location='${API_BASE}/descargar?public_id=${file.public_id}'">
+              Descargar archivo
+            </button>
+          `;
+
           galeria.appendChild(col);
         });
       } catch (error) {
-        galeria.innerHTML = "<p class='text-danger'>Error cargando imágenes.</p>";
+        console.error("Error cargando archivos:", error);
+        galeria.innerHTML = "<p class='text-danger'>Error cargando archivos.</p>";
       }
     });
   }
 
+  // --- Subir archivo ---
   if (uploadForm) {
     uploadForm.addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -70,12 +81,15 @@ document.addEventListener("DOMContentLoaded", () => {
         const data = await res.json();
 
         if (res.ok) {
-          alert("✅ Imagen subida correctamente");
+          alert("✅ Archivo subido correctamente");
+          console.log("Cloudinary:", data);
         } else {
-          alert("❌ Error al subir la imagen");
+          alert("❌ Error al subir el archivo");
+          console.error(data);
         }
       } catch (error) {
         alert("❌ Error de conexión con el servidor");
+        console.error(error);
       }
     });
   }
