@@ -5,12 +5,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const uploadForm = document.getElementById("uploadForm");
   const galeria = document.getElementById("galeria");
 
-  // --- Buscar imágenes por grado y año ---
   if (buscarBtn) {
     buscarBtn.addEventListener("click", async () => {
       const grado = document.getElementById("grado").value;
       const anio = document.getElementById("anio").value;
-      const tipo = document.body.dataset.tipo; // "matriculas" o "observadores"
+      const tipo = document.body.dataset.tipo;
 
       if (!grado || !anio) {
         galeria.innerHTML = "<p class='text-danger'>Selecciona grado y año.</p>";
@@ -37,13 +36,11 @@ document.addEventListener("DOMContentLoaded", () => {
           galeria.appendChild(col);
         });
       } catch (error) {
-        console.error("Error cargando imágenes:", error);
         galeria.innerHTML = "<p class='text-danger'>Error cargando imágenes.</p>";
       }
     });
   }
 
-  // --- Subir imágenes ---
   if (uploadForm) {
     uploadForm.addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -74,19 +71,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (res.ok) {
           alert("✅ Imagen subida correctamente");
-          console.log("Cloudinary:", data);
         } else {
           alert("❌ Error al subir la imagen");
-          console.error(data);
         }
       } catch (error) {
         alert("❌ Error de conexión con el servidor");
-        console.error(error);
       }
     });
   }
 });
-
-
-
-
