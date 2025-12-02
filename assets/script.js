@@ -1,16 +1,16 @@
-const API_BASE = "https://backend-cloudinary.vercel.app"; // ⚠️ sin la barra al final
+const API_BASE = "https://backend-cloudinary.vercel.app"; 
 
 document.addEventListener("DOMContentLoaded", () => {
   const buscarBtn = document.getElementById("buscar");
   const uploadForm = document.getElementById("uploadForm");
   const galeria = document.getElementById("galeria");
 
-  // --- Buscar archivos ---
+
   if (buscarBtn) {
     buscarBtn.addEventListener("click", async () => {
       const grado = document.getElementById("grado").value;
       const anio = document.getElementById("anio").value;
-      const tipo = document.body.dataset.tipo; // "matriculas" o "observadores"
+      const tipo = document.body.dataset.tipo;
 
       if (!grado || !anio) {
         galeria.innerHTML = "<p class='text-danger'>Selecciona grado y año.</p>";
@@ -51,7 +51,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // --- Subir archivo ---
+
   if (uploadForm) {
     uploadForm.addEventListener("submit", async (e) => {
       e.preventDefault();
