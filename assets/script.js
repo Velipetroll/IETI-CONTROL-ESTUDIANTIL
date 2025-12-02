@@ -51,7 +51,59 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /* ============================
-        SUBIR ARCHIVO (RAW + PROGRESO + RETRY)
+      SUBIR ARCHIVO CON PROGRESO
+  ============================ */
+
+  function subirConReintentos(file, grado, anio, tipo, intento = 1) {
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open("POST", `${API_BASE}/upload`);
+
+      xhr.upload.onprogress = (event) => {
+        if (event.lengthComputable) {
+          const porcentaje = Math.round((event.loaded / event.total) * 100);
+          const barra = document.getElementById("barraProgreso");
+          if (barra) {
+            barra.style.width = porcentaje + "%";
+            barra.textContent = porcentaje + "%";
+          }
+        }
+      };
+
+      xhr.onload = () => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          resolve(JSON.parse(xhr.responseText));
+        } else {
+          if (intento < 3) {
+            console.warn(`Reintentando (${intento}/3)...`);
+            resolve(subirConReintentos(file, grado, anio, tipo, intento + 1));
+          } else {
+            reject("Error al subir archivo.");
+          }
+        }
+      };
+
+      xhr.onerror = () => {
+        if (intento < 3) {
+          console.warn(`Reintentando por error de red (${intento}/3)...`);
+          resolve(subirConReintentos(file, grado, anio, tipo, intento + 1));
+        } else {
+          reject("Error de red.");
+        }
+      };
+
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("grado", grado);
+      formData.append("anio", anio);
+      formData.append("tipo", tipo);
+
+      xhr.send(formData);
+    });
+  }
+
+  /* ============================
+        MANEJO DEL FORM
   ============================ */
   if (uploadForm) {
     uploadForm.addEventListener("submit", async (e) => {
@@ -67,7 +119,6 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      // Barra de progreso
       const progresoDiv = document.getElementById("progreso");
       if (progresoDiv) progresoDiv.innerHTML = `
         <div class="progress my-2">
@@ -76,55 +127,8 @@ document.addEventListener("DOMContentLoaded", () => {
         </div>
       `;
 
-      const subirConReintentos = (intento = 1) =>
-        new Promise((resolve, reject) => {
-          const xhr = new XMLHttpRequest();
-          xhr.open("POST", `${API_BASE}/upload`);
-
-          xhr.upload.onprogress = (event) => {
-            if (event.lengthComputable) {
-              const porcentaje = Math.round((event.loaded / event.total) * 100);
-              const barra = document.getElementById("barraProgreso");
-              if (barra) {
-                barra.style.width = porcentaje + "%";
-                barra.textContent = porcentaje + "%";
-              }
-            }
-          };
-
-          xhr.onload = () => {
-            if (xhr.status >= 200 && xhr.status < 300) {
-              resolve(JSON.parse(xhr.responseText));
-            } else {
-              if (intento < 3) {
-                console.warn(`Reintentando subida (${intento}/3)...`);
-                resolve(subirConReintentos(intento + 1));
-              } else {
-                reject("Error al subir archivo.");
-              }
-            }
-          };
-
-          xhr.onerror = () => {
-            if (intento < 3) {
-              console.warn(`Reintentando por error de red (${intento}/3)...`);
-              resolve(subirConReintentos(intento + 1));
-            } else {
-              reject("Error de red.");
-            }
-          };
-
-          const formData = new FormData();
-          formData.append("file", file);
-          formData.append("grado", grado);
-          formData.append("anio", anio);
-          formData.append("tipo", tipo);
-
-          xhr.send(formData);
-        });
-
       try {
-        const respuesta = await subirConReintentos();
+        const respuesta = await subirConReintentos(file, grado, anio, tipo);
 
         alert("✅ Archivo subido correctamente");
         console.log("Cloudinary:", respuesta);
