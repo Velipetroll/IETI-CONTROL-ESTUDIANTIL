@@ -1,10 +1,9 @@
-const API_BASE = "https://backend-cloudinary.vercel.app"; 
+const API_BASE = "https://backend-cloudinary.vercel.app";
 
 document.addEventListener("DOMContentLoaded", () => {
   const buscarBtn = document.getElementById("buscar");
   const uploadForm = document.getElementById("uploadForm");
   const galeria = document.getElementById("galeria");
-
 
   if (buscarBtn) {
     buscarBtn.addEventListener("click", async () => {
@@ -33,24 +32,20 @@ document.addEventListener("DOMContentLoaded", () => {
         data.forEach((file) => {
           const col = document.createElement("div");
           col.className = "col-md-3 mb-3 text-center";
-
           col.innerHTML = `
             <img src="${file.url}" class="img-fluid rounded shadow-sm mb-2">
             <button class="btn btn-primary btn-sm w-100"
-              onclick="window.location='${API_BASE}/descargar?public_id=${file.public_id}'">
+              onclick="window.open('${API_BASE}/descargar?public_id=${file.public_id}', '_blank')">
               Descargar archivo
             </button>
           `;
-
           galeria.appendChild(col);
         });
-      } catch (error) {
-        console.error("Error cargando archivos:", error);
+      } catch {
         galeria.innerHTML = "<p class='text-danger'>Error cargando archivos.</p>";
       }
     });
   }
-
 
   if (uploadForm) {
     uploadForm.addEventListener("submit", async (e) => {
@@ -85,11 +80,9 @@ document.addEventListener("DOMContentLoaded", () => {
           console.log("Cloudinary:", data);
         } else {
           alert("❌ Error al subir el archivo");
-          console.error(data);
         }
-      } catch (error) {
+      } catch {
         alert("❌ Error de conexión con el servidor");
-        console.error(error);
       }
     });
   }
