@@ -5,6 +5,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const uploadForm = document.getElementById("uploadForm");
   const galeria = document.getElementById("galeria");
 
+  /* ============================
+        LISTAR ARCHIVOS
+  ============================ */
   if (buscarBtn) {
     buscarBtn.addEventListener("click", async () => {
       const grado = document.getElementById("grado").value;
@@ -47,6 +50,9 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  /* ============================
+        SUBIR ARCHIVO (RAW + PROGRESO + RETRY)
+  ============================ */
   if (uploadForm) {
     uploadForm.addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -61,28 +67,69 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("grado", grado);
-      formData.append("anio", anio);
-      formData.append("tipo", tipo);
+      // Barra de progreso
+      const progresoDiv = document.getElementById("progreso");
+      if (progresoDiv) progresoDiv.innerHTML = `
+        <div class="progress my-2">
+          <div id="barraProgreso" class="progress-bar progress-bar-striped progress-bar-animated"
+          role="progressbar" style="width: 0%">0%</div>
+        </div>
+      `;
 
-      try {
-        const res = await fetch(`${API_BASE}/upload`, {
-          method: "POST",
-          body: formData,
+      const subirConReintentos = (intento = 1) =>
+        new Promise((resolve, reject) => {
+          const xhr = new XMLHttpRequest();
+          xhr.open("POST", `${API_BASE}/upload`);
+
+          xhr.upload.onprogress = (event) => {
+            if (event.lengthComputable) {
+              const porcentaje = Math.round((event.loaded / event.total) * 100);
+              const barra = document.getElementById("barraProgreso");
+              if (barra) {
+                barra.style.width = porcentaje + "%";
+                barra.textContent = porcentaje + "%";
+              }
+            }
+          };
+
+          xhr.onload = () => {
+            if (xhr.status >= 200 && xhr.status < 300) {
+              resolve(JSON.parse(xhr.responseText));
+            } else {
+              if (intento < 3) {
+                console.warn(`Reintentando subida (${intento}/3)...`);
+                resolve(subirConReintentos(intento + 1));
+              } else {
+                reject("Error al subir archivo.");
+              }
+            }
+          };
+
+          xhr.onerror = () => {
+            if (intento < 3) {
+              console.warn(`Reintentando por error de red (${intento}/3)...`);
+              resolve(subirConReintentos(intento + 1));
+            } else {
+              reject("Error de red.");
+            }
+          };
+
+          const formData = new FormData();
+          formData.append("file", file);
+          formData.append("grado", grado);
+          formData.append("anio", anio);
+          formData.append("tipo", tipo);
+
+          xhr.send(formData);
         });
 
-        const data = await res.json();
+      try {
+        const respuesta = await subirConReintentos();
 
-        if (res.ok) {
-          alert("✅ Archivo subido correctamente");
-          console.log("Cloudinary:", data);
-        } else {
-          alert("❌ Error al subir el archivo");
-        }
-      } catch {
-        alert("❌ Error de conexión con el servidor");
+        alert("✅ Archivo subido correctamente");
+        console.log("Cloudinary:", respuesta);
+      } catch (error) {
+        alert("❌ No se pudo subir el archivo: " + error);
       }
     });
   }
