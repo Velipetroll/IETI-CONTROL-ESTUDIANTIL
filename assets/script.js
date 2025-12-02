@@ -1,18 +1,16 @@
-const API_BASE = "https://backend-cloudinary.vercel.app";
+const API_BASE = "https://backend-cloudinary.vercel.app"; // ⚠️ sin la barra al final
 
 document.addEventListener("DOMContentLoaded", () => {
   const buscarBtn = document.getElementById("buscar");
   const uploadForm = document.getElementById("uploadForm");
   const galeria = document.getElementById("galeria");
 
-  /* ============================
-        LISTAR ARCHIVOS
-  ============================ */
+  // --- Buscar archivos ---
   if (buscarBtn) {
     buscarBtn.addEventListener("click", async () => {
       const grado = document.getElementById("grado").value;
       const anio = document.getElementById("anio").value;
-      const tipo = document.body.dataset.tipo;
+      const tipo = document.body.dataset.tipo; // "matriculas" o "observadores"
 
       if (!grado || !anio) {
         galeria.innerHTML = "<p class='text-danger'>Selecciona grado y año.</p>";
@@ -35,76 +33,25 @@ document.addEventListener("DOMContentLoaded", () => {
         data.forEach((file) => {
           const col = document.createElement("div");
           col.className = "col-md-3 mb-3 text-center";
+
           col.innerHTML = `
             <img src="${file.url}" class="img-fluid rounded shadow-sm mb-2">
             <button class="btn btn-primary btn-sm w-100"
-              onclick="window.open('${API_BASE}/descargar?public_id=${file.public_id}', '_blank')">
+              onclick="window.location='${API_BASE}/descargar?public_id=${file.public_id}'">
               Descargar archivo
             </button>
           `;
+
           galeria.appendChild(col);
         });
-      } catch {
+      } catch (error) {
+        console.error("Error cargando archivos:", error);
         galeria.innerHTML = "<p class='text-danger'>Error cargando archivos.</p>";
       }
     });
   }
 
-  /* ============================
-      SUBIR ARCHIVO CON PROGRESO
-  ============================ */
-
-  function subirConReintentos(file, grado, anio, tipo, intento = 1) {
-    return new Promise((resolve, reject) => {
-      const xhr = new XMLHttpRequest();
-      xhr.open("POST", `${API_BASE}/upload`);
-
-      xhr.upload.onprogress = (event) => {
-        if (event.lengthComputable) {
-          const porcentaje = Math.round((event.loaded / event.total) * 100);
-          const barra = document.getElementById("barraProgreso");
-          if (barra) {
-            barra.style.width = porcentaje + "%";
-            barra.textContent = porcentaje + "%";
-          }
-        }
-      };
-
-      xhr.onload = () => {
-        if (xhr.status >= 200 && xhr.status < 300) {
-          resolve(JSON.parse(xhr.responseText));
-        } else {
-          if (intento < 3) {
-            console.warn(`Reintentando (${intento}/3)...`);
-            resolve(subirConReintentos(file, grado, anio, tipo, intento + 1));
-          } else {
-            reject("Error al subir archivo.");
-          }
-        }
-      };
-
-      xhr.onerror = () => {
-        if (intento < 3) {
-          console.warn(`Reintentando por error de red (${intento}/3)...`);
-          resolve(subirConReintentos(file, grado, anio, tipo, intento + 1));
-        } else {
-          reject("Error de red.");
-        }
-      };
-
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("grado", grado);
-      formData.append("anio", anio);
-      formData.append("tipo", tipo);
-
-      xhr.send(formData);
-    });
-  }
-
-  /* ============================
-        MANEJO DEL FORM
-  ============================ */
+  // --- Subir archivo ---
   if (uploadForm) {
     uploadForm.addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -119,21 +66,30 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      const progresoDiv = document.getElementById("progreso");
-      if (progresoDiv) progresoDiv.innerHTML = `
-        <div class="progress my-2">
-          <div id="barraProgreso" class="progress-bar progress-bar-striped progress-bar-animated"
-          role="progressbar" style="width: 0%">0%</div>
-        </div>
-      `;
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("grado", grado);
+      formData.append("anio", anio);
+      formData.append("tipo", tipo);
 
       try {
-        const respuesta = await subirConReintentos(file, grado, anio, tipo);
+        const res = await fetch(`${API_BASE}/upload`, {
+          method: "POST",
+          body: formData,
+        });
 
-        alert("✅ Archivo subido correctamente");
-        console.log("Cloudinary:", respuesta);
+        const data = await res.json();
+
+        if (res.ok) {
+          alert("✅ Archivo subido correctamente");
+          console.log("Cloudinary:", data);
+        } else {
+          alert("❌ Error al subir el archivo");
+          console.error(data);
+        }
       } catch (error) {
-        alert("❌ No se pudo subir el archivo: " + error);
+        alert("❌ Error de conexión con el servidor");
+        console.error(error);
       }
     });
   }
