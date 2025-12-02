@@ -1,16 +1,22 @@
-const API_BASE = "https://backend-cloudinary.vercel.app"; // ⚠️ sin la barra al final
+const API_BASE = "https://backend-cloudinary.vercel.app"; // Backend solo para listar/descargar
+
+// ⚠️ CONFIGURAR ESTO:
+const CLOUD_NAME = "dweoz84zz"; 
+const UPLOAD_PRESET = "estudiantes"; // Debe ser UNSIGNED
 
 document.addEventListener("DOMContentLoaded", () => {
   const buscarBtn = document.getElementById("buscar");
   const uploadForm = document.getElementById("uploadForm");
   const galeria = document.getElementById("galeria");
 
-  // --- Buscar archivos ---
+  /* ======================================================
+                  BUSCAR ARCHIVOS (BACKEND)
+  ====================================================== */
   if (buscarBtn) {
     buscarBtn.addEventListener("click", async () => {
       const grado = document.getElementById("grado").value;
       const anio = document.getElementById("anio").value;
-      const tipo = document.body.dataset.tipo; // "matriculas" o "observadores"
+      const tipo = document.body.dataset.tipo;
 
       if (!grado || !anio) {
         galeria.innerHTML = "<p class='text-danger'>Selecciona grado y año.</p>";
@@ -45,13 +51,14 @@ document.addEventListener("DOMContentLoaded", () => {
           galeria.appendChild(col);
         });
       } catch (error) {
-        console.error("Error cargando archivos:", error);
         galeria.innerHTML = "<p class='text-danger'>Error cargando archivos.</p>";
       }
     });
   }
 
-  // --- Subir archivo ---
+  /* ======================================================
+        SUBIR ARCHIVO — DIRECTO A CLOUDINARY (SIN VERCEL)
+  ====================================================== */
   if (uploadForm) {
     uploadForm.addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -66,21 +73,24 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
+      const folder = `${tipo}/${anio}/${grado}`;
+
+      const cloudinaryURL = `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/auto/upload`;
+
       const formData = new FormData();
       formData.append("file", file);
-      formData.append("grado", grado);
-      formData.append("anio", anio);
-      formData.append("tipo", tipo);
+      formData.append("upload_preset", UPLOAD_PRESET);
+      formData.append("folder", folder);
 
       try {
-        const res = await fetch(`${API_BASE}/upload`, {
+        const res = await fetch(cloudinaryURL, {
           method: "POST",
           body: formData,
         });
 
         const data = await res.json();
 
-        if (res.ok) {
+        if (data.secure_url) {
           alert("✅ Archivo subido correctamente");
           console.log("Cloudinary:", data);
         } else {
@@ -88,7 +98,7 @@ document.addEventListener("DOMContentLoaded", () => {
           console.error(data);
         }
       } catch (error) {
-        alert("❌ Error de conexión con el servidor");
+        alert("❌ Error al conectar con Cloudinary");
         console.error(error);
       }
     });
