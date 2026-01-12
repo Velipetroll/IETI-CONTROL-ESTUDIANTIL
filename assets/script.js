@@ -1,17 +1,14 @@
-const API_BASE = "https://backend-cloudinary.vercel.app"; // Backend solo para listar/descargar
+const API_BASE = "https://backend-cloudinary.vercel.app"; 
 
-// ⚠️ CONFIGURAR ESTO:
+
 const CLOUD_NAME = "dweoz84zz"; 
-const UPLOAD_PRESET = "estudiantes"; // Debe ser UNSIGNED
+const UPLOAD_PRESET = "estudiantes"; 
 
 document.addEventListener("DOMContentLoaded", () => {
   const buscarBtn = document.getElementById("buscar");
   const uploadForm = document.getElementById("uploadForm");
   const galeria = document.getElementById("galeria");
 
-  /* ======================================================
-                  BUSCAR ARCHIVOS (BACKEND)
-  ====================================================== */
   if (buscarBtn) {
     buscarBtn.addEventListener("click", async () => {
       const grado = document.getElementById("grado").value;
@@ -56,9 +53,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  /* ======================================================
-        SUBIR ARCHIVO — DIRECTO A CLOUDINARY (SIN VERCEL)
-  ====================================================== */
   if (uploadForm) {
     uploadForm.addEventListener("submit", async (e) => {
       e.preventDefault();
