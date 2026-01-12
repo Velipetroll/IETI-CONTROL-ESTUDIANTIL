@@ -10,7 +10,7 @@
 
   <nav class="navbar navbar-light bg-white shadow-sm">
     <div class="container">
-      <a href="home.html" class="navbar-brand fw-bold text-primary">← Inicio</a>
+      <a href="home.php" class="navbar-brand fw-bold text-primary">← Inicio</a>
       <span class="navbar-text text-secondary">Observadores</span>
     </div>
   </nav>
@@ -175,6 +175,7 @@
   <script src="assets/script.js"></script>
 </body>
 </html>
+
 
 
 
